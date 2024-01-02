@@ -1,0 +1,30 @@
+
+wget ftp://ftp_username@ftp_server/vCenter/VMware-ESXi-7.0.2-17630552-HPE-702.0.0.10.6.3.24-Mar2021\(7U2\).iso --ask-password
+mount vmware-ESXi-7.0.2-17630552-HPE.iso /mnt
+mkdir -p esxi_214/temp/etc/vmware/weasel
+cp -r /mnt/* esxi_214/
+cp esxi_214/boot.cfg esxi_214/boot.cfg.orig
+cp esxi_214/efi/boot/boot.cfg esxi_214/efi/boot/boot.cfg.orig
+cd esxi_214/
+vi boot.cfg
+kernelopt=ks=file://etc/vmware/weasel/ks.cfg    # for local file
+kernelopt=ks=http://172.20.22.118:8080/ks.cfg ip=172.20.22.212 netmask=255.255.255.0 gateway=172.20.22.1 nameserver=8.8.8.8 netdevice-vmnic0  # for remote file
+vi efi/boot/boot.cfg
+kernelopt=ks=file://etc/vmware/weasel/ks.cfg    # for local file
+kernelopt=ks=http://172.20.22.118:8080/ks.cfg ip=172.20.22.212 netmask=255.255.255.0 gateway=172.20.22.1 nameserver=8.8.8.8 netdevice-vmnic0  # for remote file
+vi temp/etc/vmware/weasel/ks.cfg
+
+vmaccepteula
+clearpart --firstdisk=local --overwritevmfs
+install --firstdisk=local --overwritevmfs
+#rootpw --iscrypted 
+rootpw myp@ssw0rd
+#network --bootproto=static --addvmportgroup=1 --vlanid=1   --ip=172.20.22.212 --netmask=255.255.255.0 --gateway= 172.20.22.1  --nameserver="8.8.8.8" --hostname= localhost
+network --bootproto=static --ip=172.20.22.212 --netmask=255.255.255.0 --gateway=172.20.22.1 --hostname=localhost --nameserver=8.8.8.8 --addvmportgroup=1
+reboot
+cd temp
+tar czvf bmks.tgz *
+chmod ugo+x bmks.tgz
+cp bmks.tgz ../
+cd ../../
+mkisofs -relaxed-filenames -J -R -b isolinux.bin -c boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -eltorito-alt-boot -e efiboot.img -boot-load-size 1 -no-emul-boot -o ./esxi_214.iso ./esxi_214/
