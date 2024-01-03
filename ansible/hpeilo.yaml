@@ -4,8 +4,8 @@
   gather_facts: False
   vars:
     - ilo_ip: 172.20.24.212
-    - ilo_username: sysadmin
-    - ilo_password: C10ud_SHM!
+    - ilo_username: "ilo_username"
+    - ilo_password: "ilo_password"
   tasks:
     - name: test hpe ilo
       community.general.hpilo_boot:
@@ -14,18 +14,20 @@
         password: "{{ ilo_password }}"
         state: connect
         media: cdrom
-        image: http://172.20.22.118:8080/esxi_214.iso
+        image: http://"http_ip":"http_port"/esxi_214.iso
       delegate_to: localhost
     - name: add esxi to the vcenter
       vmware_host:
         hostname: 172.20.22.120
-        username: "m.shoaei@vsphere.local"
-        password: "Admin@313"
-        datacenter_name: "SHM Datacenter"
+        username: "vcneter_username@vsphere.local"
+        password: "vcenter_password"
+        datacenter: "datacenter_name"
+        folder: '/"datacenter_name"/host'
+        #cluster: "cluster_name" 
         esxi_hostname: "172.20.22.212"
         esxi_username: "root"
-        esxi_password: "myp@ssw0rd"
-        validate_password: False
+        esxi_password: "esxi_password"
+        validate_certs: False
         state: present
       delegate_to: localhost
 ...
